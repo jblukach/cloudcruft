@@ -120,6 +120,7 @@ class CloudcruftStack(Stack):
             },
             billing_mode = _dynamodb.BillingMode.PAY_PER_REQUEST,
             removal_policy = RemovalPolicy.DESTROY,
+            time_to_live_attribute = 'ttl',
             point_in_time_recovery = True,
             deletion_protection = True
         )
@@ -143,8 +144,10 @@ class CloudcruftStack(Stack):
             _iam.PolicyStatement(
                 actions = [
                     'dynamodb:PutItem',
+                    'dynamodb:Query',
                     's3:GetObject',
                     's3:ListBucket',
+                    's3:PutObject',
                     'ssm:GetParameter',
                     'states:StartExecution'
                 ],
@@ -177,7 +180,7 @@ class CloudcruftStack(Stack):
         startlogs = _logs.LogGroup(
             self, 'startlogs',
             log_group_name = '/aws/lambda/'+start.function_name,
-            retention = _logs.RetentionDays.ONE_MONTH,
+            retention = _logs.RetentionDays.ONE_DAY,
             removal_policy = RemovalPolicy.DESTROY
         )
 
@@ -195,22 +198,22 @@ class CloudcruftStack(Stack):
             _actions.SnsAction(topic)
         )
 
-        #event = _events.Rule(
-        #    self, 'event',
-        #    schedule = _events.Schedule.cron(
-        #        minute = '0',
-        #        hour = '*',
-        #        month = '*',
-        #        week_day = '*',
-        #        year = '*'
-        #    )
-        #)
+        event = _events.Rule(
+            self, 'event',
+            schedule = _events.Schedule.cron(
+                minute = '0',
+                hour = '11',
+                month = '*',
+                week_day = '*',
+                year = '*'
+            )
+        )
 
-        #event.add_target(
-        #    _targets.LambdaFunction(
-        #        start
-        #    )
-        #)
+        event.add_target(
+            _targets.LambdaFunction(
+                start
+            )
+        )
 
     ### STEP LAMBDA ###
 
@@ -235,7 +238,7 @@ class CloudcruftStack(Stack):
         steplogs = _logs.LogGroup(
             self, 'steplogs',
             log_group_name = '/aws/lambda/'+step.function_name,
-            retention = _logs.RetentionDays.ONE_MONTH,
+            retention = _logs.RetentionDays.ONE_DAY,
             removal_policy = RemovalPolicy.DESTROY
         )
 
@@ -265,7 +268,7 @@ class CloudcruftStack(Stack):
             environment = dict(
                 AWS_ACCOUNT = account
             ),
-            memory_size = 256,
+            memory_size = 512,
             retry_attempts = 0,
             role = role,
             layers = [
@@ -276,7 +279,7 @@ class CloudcruftStack(Stack):
         checklogs = _logs.LogGroup(
             self, 'checklogs',
             log_group_name = '/aws/lambda/'+check.function_name,
-            retention = _logs.RetentionDays.ONE_MONTH,
+            retention = _logs.RetentionDays.ONE_DAY,
             removal_policy = RemovalPolicy.DESTROY
         )
 
@@ -306,7 +309,7 @@ class CloudcruftStack(Stack):
             environment = dict(
                 AWS_ACCOUNT = account
             ),
-            memory_size = 512,
+            memory_size = 256,
             retry_attempts = 0,
             role = role,
             layers = [
@@ -317,7 +320,7 @@ class CloudcruftStack(Stack):
         readlogs = _logs.LogGroup(
             self, 'readlogs',
             log_group_name = '/aws/lambda/'+read.function_name,
-            retention = _logs.RetentionDays.ONE_MONTH,
+            retention = _logs.RetentionDays.ONE_DAY,
             removal_policy = RemovalPolicy.DESTROY
         )
 

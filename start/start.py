@@ -16,19 +16,21 @@ def handler(event, context):
         Prefix = 'ip'
     )
 
-    keys = []
     for key in objects['Contents']:
+
+        keys = []
         keys.append(key['Key'])
 
-    getobject = {}
-    getobject['keys'] = keys
+        getobject = {}
+        getobject['keys'] = keys
+        getobject['total'] = 0
 
-    step = boto3.client('stepfunctions')
+        step = boto3.client('stepfunctions')
      
-    step.start_execution(
-        stateMachineArn = ssm['Parameter']['Value'],
-        input = json.dumps(getobject)
-    )
+        step.start_execution(
+            stateMachineArn = ssm['Parameter']['Value'],
+            input = json.dumps(getobject)
+        )
 
     return {
         'statusCode': 200,
