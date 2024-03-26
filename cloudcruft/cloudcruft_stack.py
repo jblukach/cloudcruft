@@ -453,7 +453,6 @@ class CloudcruftStack(Stack):
             timeout = Duration.seconds(900),
             environment = dict(
                 AWS_ACCOUNT = account,
-                S3_BUCKET = bucket.bucket_name,
                 UP_BUCKET = 'static.tundralabs.net'
             ),
             memory_size = 1024,
@@ -494,4 +493,54 @@ class CloudcruftStack(Stack):
 
         ipevent.add_target(
             _targets.LambdaFunction(ip)
+        )
+
+    ### DNS LAMBDA ###
+
+        dns = _lambda.DockerImageFunction(
+            self, 'dns',
+            code = _lambda.DockerImageCode.from_image_asset('dns'),
+            timeout = Duration.seconds(900),
+            environment = dict(
+                AWS_ACCOUNT = account,
+                UP_BUCKET = 'static.tundralabs.net'
+            ),
+            memory_size = 1024,
+            role = role
+        )
+
+        dnslogs = _logs.LogGroup(
+            self, 'dnslogs',
+            log_group_name = '/aws/lambda/'+dns.function_name,
+            retention = _logs.RetentionDays.ONE_DAY,
+            removal_policy = RemovalPolicy.DESTROY
+        )
+
+        dnsalarm = _cloudwatch.Alarm(
+            self, 'dnsalarm',
+            comparison_operator = _cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+            threshold = 0,
+            evaluation_periods = 1,
+            metric = dns.metric_errors(
+                period = Duration.minutes(1)
+            )
+        )
+
+        dnsalarm.add_alarm_action(
+            _actions.SnsAction(topic)
+        )
+
+        dnsevent = _events.Rule(
+            self, 'dnsevent',
+            schedule = _events.Schedule.cron(
+                minute = '0',
+                hour = '11',
+                month = '*',
+                week_day = '*',
+                year = '*'
+            )
+        )
+
+        dnsevent.add_target(
+            _targets.LambdaFunction(dns)
         )
