@@ -1,4 +1,4 @@
-# 2.133.0 (build dcc1e75) # DEV
+# 2.134.0 (build 265d769) #
 FROM public.ecr.aws/forensicir/getpublicip:latest AS layer
 FROM public.ecr.aws/lambda/python:latest
 ### layer code ###

@@ -6,6 +6,6 @@ WORKDIR /opt
 COPY --from=layer /opt/ .
 ### function code ###
 WORKDIR /var/task
-COPY dns.py requirements.txt .
+COPY findip.py requirements.txt .
 RUN pip --no-cache-dir install -r requirements.txt --upgrade
-CMD ["dns.handler"]
+CMD ["findip.handler"]
