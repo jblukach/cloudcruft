@@ -166,7 +166,7 @@ class CloudcruftStack(Stack):
             self, 'start',
             runtime = _lambda.Runtime.PYTHON_3_12,
             architecture = _lambda.Architecture.ARM_64,
-            code = _lambda.Code.from_asset('start'),
+            code = _lambda.Code.from_asset('function/start'),
             timeout = Duration.seconds(900),
             handler = 'start.handler',
             environment = dict(
@@ -224,7 +224,7 @@ class CloudcruftStack(Stack):
             self, 'step',
             runtime = _lambda.Runtime.PYTHON_3_12,
             architecture = _lambda.Architecture.ARM_64,
-            code = _lambda.Code.from_asset('step'),
+            code = _lambda.Code.from_asset('function/step'),
             timeout = Duration.seconds(3),
             handler = 'step.handler',
             environment = dict(
@@ -265,7 +265,7 @@ class CloudcruftStack(Stack):
             self, 'check',
             runtime = _lambda.Runtime.PYTHON_3_12,
             architecture = _lambda.Architecture.ARM_64,
-            code = _lambda.Code.from_asset('check'),
+            code = _lambda.Code.from_asset('function/check'),
             timeout = Duration.seconds(900),
             handler = 'check.handler',
             environment = dict(
@@ -306,7 +306,7 @@ class CloudcruftStack(Stack):
             self, 'read',
             runtime = _lambda.Runtime.PYTHON_3_12,
             architecture = _lambda.Architecture.ARM_64,
-            code = _lambda.Code.from_asset('read'),
+            code = _lambda.Code.from_asset('function/read'),
             timeout = Duration.seconds(900),
             handler = 'read.handler',
             environment = dict(
@@ -408,7 +408,7 @@ class CloudcruftStack(Stack):
 
         ip = _lambda.DockerImageFunction(
             self, 'ip',
-            code = _lambda.DockerImageCode.from_image_asset('ip'),
+            code = _lambda.DockerImageCode.from_image_asset('build/ip'),
             timeout = Duration.seconds(900),
             environment = dict(
                 AWS_ACCOUNT = account,
@@ -458,7 +458,7 @@ class CloudcruftStack(Stack):
 
         dns = _lambda.DockerImageFunction(
             self, 'dns',
-            code = _lambda.DockerImageCode.from_image_asset('dns'),
+            code = _lambda.DockerImageCode.from_image_asset('build/dns'),
             timeout = Duration.seconds(900),
             environment = dict(
                 AWS_ACCOUNT = account,
@@ -534,7 +534,7 @@ class CloudcruftStack(Stack):
 
         findip = _lambda.DockerImageFunction(
             self, 'findip',
-            code = _lambda.DockerImageCode.from_image_asset('findip'),
+            code = _lambda.DockerImageCode.from_image_asset('search/findip'),
             timeout = Duration.seconds(7),
             environment = dict(
                 AWS_ACCOUNT = account
@@ -572,7 +572,7 @@ class CloudcruftStack(Stack):
 
         finddns = _lambda.DockerImageFunction(
             self, 'finddns',
-            code = _lambda.DockerImageCode.from_image_asset('finddns'),
+            code = _lambda.DockerImageCode.from_image_asset('search/finddns'),
             timeout = Duration.seconds(7),
             environment = dict(
                 AWS_ACCOUNT = account
