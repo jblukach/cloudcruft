@@ -80,7 +80,7 @@ https://dns.tundralabs.net/wexe.ink
 ### IP Command
 
 ```
-https://ban.tundralabs.net/49.143.32.6
+https://ip.tundralabs.net/49.143.32.6
 ```
 
 ### IP Output
