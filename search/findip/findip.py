@@ -26,6 +26,6 @@ def handler(event, context):
         code = 404
 
     return {
-        'statusCode': 200,
+        'statusCode': code,
         'body': json.dumps(msg, indent = 4)
     }
