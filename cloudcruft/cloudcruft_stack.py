@@ -534,7 +534,7 @@ class CloudcruftStack(Stack):
 
         findip = _lambda.DockerImageFunction(
             self, 'findip',
-            code = _lambda.DockerImageCode.from_image_asset('search/findip'),
+            code = _lambda.DockerImageCode.from_image_asset('search/ip'),
             timeout = Duration.seconds(7),
             environment = dict(
                 AWS_ACCOUNT = account
@@ -572,7 +572,7 @@ class CloudcruftStack(Stack):
 
         finddns = _lambda.DockerImageFunction(
             self, 'finddns',
-            code = _lambda.DockerImageCode.from_image_asset('search/finddns'),
+            code = _lambda.DockerImageCode.from_image_asset('search/dns'),
             timeout = Duration.seconds(7),
             environment = dict(
                 AWS_ACCOUNT = account
