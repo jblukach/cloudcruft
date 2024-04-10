@@ -25,26 +25,49 @@ def handler(event, context):
 
     s3 = boto3.client('s3')
 
+    df = pd.DataFrame(columns=['address', 'source'])
+
     objects = s3.list_objects(
         Bucket = 'projectcaretaker',
-        Prefix = 'ip'
+        Prefix = 'ipv4'
     )
-
-    df = pd.DataFrame(columns=['address', 'source'])
 
     for key in objects['Contents']:
 
-        fname = key['Key'].split('/')[1]
-        source = fname[:-4]
-        print(key['Key'])
+        if key['Size'] != 0:
 
-        s3.download_file('projectcaretaker', key['Key'], '/tmp/'+fname)
+            fname = key['Key'].split('/')[1]
+            source = fname[:-4]
+            print(key['Key'])
 
-        temp = pd.read_csv('/tmp/'+fname, header=None)
-        temp.columns = ['address']
-        temp['source'] = source
+            s3.download_file('projectcaretaker', key['Key'], '/tmp/'+fname)
 
-        df = pd.concat([df, temp], ignore_index=True)
+            temp = pd.read_csv('/tmp/'+fname, header=None)
+            temp.columns = ['address']
+            temp['source'] = source
+
+            df = pd.concat([df, temp], ignore_index=True)
+
+    objects = s3.list_objects(
+        Bucket = 'projectcaretaker',
+        Prefix = 'ipv6'
+    )
+
+    for key in objects['Contents']:
+
+        if key['Size'] != 0:
+
+            fname = key['Key'].split('/')[1]
+            source = fname[:-4]
+            print(key['Key'])
+
+            s3.download_file('projectcaretaker', key['Key'], '/tmp/'+fname)
+
+            temp = pd.read_csv('/tmp/'+fname, header=None)
+            temp.columns = ['address']
+            temp['source'] = source
+
+            df = pd.concat([df, temp], ignore_index=True)
 
     df.to_parquet('/tmp/ip.parquet', compression='gzip')
 

@@ -34,17 +34,19 @@ def handler(event, context):
 
     for key in objects['Contents']:
 
-        fname = key['Key'].split('/')[1]
-        source = fname[:-4]
-        print(key['Key'])
+        if key['Size'] != 0:
 
-        s3.download_file('projectcaretaker', key['Key'], '/tmp/'+fname)
+            fname = key['Key'].split('/')[1]
+            source = fname[:-4]
+            print(key['Key'])
 
-        temp = pd.read_csv('/tmp/'+fname, header=None)
-        temp.columns = ['domain']
-        temp['source'] = source
+            s3.download_file('projectcaretaker', key['Key'], '/tmp/'+fname)
 
-        df = pd.concat([df, temp], ignore_index=True)
+            temp = pd.read_csv('/tmp/'+fname, header=None)
+            temp.columns = ['domain']
+            temp['source'] = source
+
+            df = pd.concat([df, temp], ignore_index=True)
 
     df.to_parquet('/tmp/dns.parquet', compression='gzip')
 
