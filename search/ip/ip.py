@@ -1,6 +1,7 @@
 import boto3
 import ipaddress
 import json
+import os
 import pandas as pd
 
 def handler(event, context):
@@ -13,7 +14,7 @@ def handler(event, context):
         iptype = ipaddress.ip_address(event['rawPath'][1:])
 
         s3 = boto3.client('s3')
-        s3.download_file('static.tundralabs.net', 'ip.parquet', '/tmp/ip.parquet')
+        s3.download_file(os.environ['UP_BUCKET'], 'osint-identification/ip.parquet', '/tmp/ip.parquet')
 
         address = pd.read_parquet('/tmp/ip.parquet')
         address = address[address['address'].str.contains(getpath)]

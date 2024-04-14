@@ -1,5 +1,6 @@
 import boto3
 import json
+import os
 import pandas as pd
 
 def handler(event, context):
@@ -19,7 +20,7 @@ def handler(event, context):
         else:
 
             s3 = boto3.client('s3')
-            s3.download_file('static.tundralabs.net', 'dns.parquet', '/tmp/dns.parquet')
+            s3.download_file(os.environ['UP_BUCKET'], 'osint-identification/dns.parquet', '/tmp/dns.parquet')
 
             dns = pd.read_parquet('/tmp/dns.parquet')
             dns = dns[dns['domain'].str.contains(getpath)]

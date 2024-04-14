@@ -78,7 +78,7 @@ def handler(event, context):
     f.write(hasher('/tmp/ip.parquet'))
     f.close()
 
-    f = open('/tmp/ip.updated','w')
+    f = open('/tmp/last.updated','w')
     f.write(str(datetime.datetime.now()))
     f.close()
 
@@ -91,7 +91,7 @@ def handler(event, context):
     s3.meta.client.upload_file(
         '/tmp/ip.parquet',
         os.environ['UP_BUCKET'],
-        'ip.parquet',
+        'osint-identification/ip.parquet',
         ExtraArgs = {
             'ContentType': "application/vnd.apache.parquet"
         }
@@ -100,16 +100,16 @@ def handler(event, context):
     s3.meta.client.upload_file(
         '/tmp/ip.sha256',
         os.environ['UP_BUCKET'],
-        'ip.sha256',
+        'osint-identification/ip.sha256',
         ExtraArgs = {
             'ContentType': "text/plain"
         }
     )
 
     s3.meta.client.upload_file(
-        '/tmp/ip.updated',
+        '/tmp/last.updated',
         os.environ['UP_BUCKET'],
-        'ip.updated',
+        'osint-identification/last.updated',
         ExtraArgs = {
             'ContentType': "text/plain"
         }
@@ -118,7 +118,7 @@ def handler(event, context):
     s3.meta.client.upload_file(
         '/tmp/ip.count',
         os.environ['UP_BUCKET'],
-        'ip.count',
+        'osint-identification/ip.count',
         ExtraArgs = {
             'ContentType': "text/plain"
         }

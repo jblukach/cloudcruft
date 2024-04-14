@@ -108,26 +108,6 @@ class CloudcruftStack(Stack):
             ]
         )
 
-    ### DYNAMODB ###
-
-        feed = _dynamodb.Table(
-            self, 'feed',
-            table_name = 'feed',
-            partition_key = {
-                'name': 'pk',
-                'type': _dynamodb.AttributeType.STRING
-            },
-            sort_key = {
-                'name': 'sk',
-                'type': _dynamodb.AttributeType.STRING
-            },
-            billing_mode = _dynamodb.BillingMode.PAY_PER_REQUEST,
-            removal_policy = RemovalPolicy.DESTROY,
-            time_to_live_attribute = 'ttl',
-            point_in_time_recovery = True,
-            deletion_protection = True
-        )
-
     ### IAM ROLE ###
 
         role = _iam.Role(
@@ -146,262 +126,14 @@ class CloudcruftStack(Stack):
         role.add_to_policy(
             _iam.PolicyStatement(
                 actions = [
-                    'dynamodb:PutItem',
-                    'dynamodb:Query',
                     's3:GetObject',
                     's3:ListBucket',
-                    's3:PutObject',
-                    'ssm:GetParameter',
-                    'states:StartExecution'
+                    's3:PutObject'
                 ],
                 resources = [
                     '*'
                 ]
             )
-        )
-
-    ### START LAMBDA ###
-
-        start = _lambda.Function(
-            self, 'start',
-            runtime = _lambda.Runtime.PYTHON_3_12,
-            architecture = _lambda.Architecture.ARM_64,
-            code = _lambda.Code.from_asset('function/start'),
-            timeout = Duration.seconds(900),
-            handler = 'start.handler',
-            environment = dict(
-                AWS_ACCOUNT = account
-            ),
-            memory_size = 256,
-            retry_attempts = 0,
-            role = role,
-            layers = [
-                getpublicip
-            ]
-        )
-
-        startlogs = _logs.LogGroup(
-            self, 'startlogs',
-            log_group_name = '/aws/lambda/'+start.function_name,
-            retention = _logs.RetentionDays.ONE_DAY,
-            removal_policy = RemovalPolicy.DESTROY
-        )
-
-        startalarm = _cloudwatch.Alarm(
-            self, 'startalarm',
-            comparison_operator = _cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-            threshold = 0,
-            evaluation_periods = 1,
-            metric = start.metric_errors(
-                period = Duration.minutes(1)
-            )
-        )
-
-        startalarm.add_alarm_action(
-            _actions.SnsAction(topic)
-        )
-
-        event = _events.Rule(
-            self, 'event',
-            schedule = _events.Schedule.cron(
-                minute = '0',
-                hour = '11',
-                month = '*',
-                week_day = 'SUN',
-                year = '*'
-            )
-        )
-
-        event.add_target(
-            _targets.LambdaFunction(
-                start
-            )
-        )
-
-    ### STEP LAMBDA ###
-
-        step = _lambda.Function(
-            self, 'step',
-            runtime = _lambda.Runtime.PYTHON_3_12,
-            architecture = _lambda.Architecture.ARM_64,
-            code = _lambda.Code.from_asset('function/step'),
-            timeout = Duration.seconds(3),
-            handler = 'step.handler',
-            environment = dict(
-                AWS_ACCOUNT = account
-            ),
-            memory_size = 128,
-            retry_attempts = 0,
-            role = role,
-            layers = [
-                getpublicip
-            ]
-        )
-
-        steplogs = _logs.LogGroup(
-            self, 'steplogs',
-            log_group_name = '/aws/lambda/'+step.function_name,
-            retention = _logs.RetentionDays.ONE_DAY,
-            removal_policy = RemovalPolicy.DESTROY
-        )
-
-        stepalarm = _cloudwatch.Alarm(
-            self, 'stepalarm',
-            comparison_operator = _cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-            threshold = 0,
-            evaluation_periods = 1,
-            metric = step.metric_errors(
-                period = Duration.minutes(1)
-            )
-        )
-
-        stepalarm.add_alarm_action(
-            _actions.SnsAction(topic)
-        )
-
-    ### CHECK LAMBDA ###
-
-        check = _lambda.Function(
-            self, 'check',
-            runtime = _lambda.Runtime.PYTHON_3_12,
-            architecture = _lambda.Architecture.ARM_64,
-            code = _lambda.Code.from_asset('function/check'),
-            timeout = Duration.seconds(900),
-            handler = 'check.handler',
-            environment = dict(
-                AWS_ACCOUNT = account
-            ),
-            memory_size = 512,
-            retry_attempts = 0,
-            role = role,
-            layers = [
-                getpublicip
-            ]
-        )
-
-        checklogs = _logs.LogGroup(
-            self, 'checklogs',
-            log_group_name = '/aws/lambda/'+check.function_name,
-            retention = _logs.RetentionDays.ONE_DAY,
-            removal_policy = RemovalPolicy.DESTROY
-        )
-
-        checkalarm = _cloudwatch.Alarm(
-            self, 'checkalarm',
-            comparison_operator = _cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-            threshold = 0,
-            evaluation_periods = 1,
-            metric = check.metric_errors(
-                period = Duration.minutes(1)
-            )
-        )
-
-        checkalarm.add_alarm_action(
-            _actions.SnsAction(topic)
-        )
-
-    ### READ LAMBDA ###
-
-        read = _lambda.Function(
-            self, 'read',
-            runtime = _lambda.Runtime.PYTHON_3_12,
-            architecture = _lambda.Architecture.ARM_64,
-            code = _lambda.Code.from_asset('function/read'),
-            timeout = Duration.seconds(900),
-            handler = 'read.handler',
-            environment = dict(
-                AWS_ACCOUNT = account
-            ),
-            memory_size = 256,
-            retry_attempts = 0,
-            role = role,
-            layers = [
-                getpublicip
-            ]
-        )
-
-        readlogs = _logs.LogGroup(
-            self, 'readlogs',
-            log_group_name = '/aws/lambda/'+read.function_name,
-            retention = _logs.RetentionDays.ONE_DAY,
-            removal_policy = RemovalPolicy.DESTROY
-        )
-
-        readalarm = _cloudwatch.Alarm(
-            self, 'readalarm',
-            comparison_operator = _cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-            threshold = 0,
-            evaluation_periods = 1,
-            metric = read.metric_errors(
-                period = Duration.minutes(1)
-            )
-        )
-
-        readalarm.add_alarm_action(
-            _actions.SnsAction(topic)
-        )
-
-    ### STEP FUNCTION ###
-
-        initial = _tasks.LambdaInvoke(
-            self, 'initial',
-            lambda_function = step,
-            output_path = '$.Payload',
-        )
-
-        checked = _tasks.LambdaInvoke(
-            self, 'checked',
-            lambda_function = check,
-            output_path = '$.Payload',
-        )
-
-        reader = _tasks.LambdaInvoke(
-            self, 'reader',
-            lambda_function = read,
-            output_path = '$.Payload',
-        )
-
-        failed = _sfn.Fail(
-            self, 'failed',
-            cause = 'Failed',
-            error = 'FAILED'
-        )
-
-        succeed = _sfn.Succeed(
-            self, 'succeeded',
-            comment = 'SUCCEEDED'
-        )
-
-        definition = initial.next(reader) \
-            .next(checked) \
-            .next(_sfn.Choice(self, 'Completed?')
-                .when(_sfn.Condition.string_equals('$.status', 'FAILED'), failed)
-                .when(_sfn.Condition.string_equals('$.status', 'SUCCEEDED'), succeed)
-                .otherwise(reader)
-            )
-
-        statelogs = _logs.LogGroup(
-            self, 'statelogs',
-            log_group_name = '/aws/state/cloudcruft',
-            retention = _logs.RetentionDays.ONE_MONTH,
-            removal_policy = RemovalPolicy.DESTROY
-        )
-
-        state = _sfn.StateMachine(
-            self, 'cloudcruft',
-            definition_body = _sfn.DefinitionBody.from_chainable(definition),
-            logs = _sfn.LogOptions(
-                destination = statelogs,
-                level = _sfn.LogLevel.ALL
-            )
-        )
-
-        parameter = _ssm.StringParameter(
-            self, 'parameter',
-            description = 'Cloud Cruft Step Function',
-            parameter_name = '/tacklebox/cloudcruft',
-            string_value = state.state_machine_arn,
-            tier = _ssm.ParameterTier.STANDARD
         )
 
     ### IP LAMBDA ###
@@ -412,7 +144,7 @@ class CloudcruftStack(Stack):
             timeout = Duration.seconds(900),
             environment = dict(
                 AWS_ACCOUNT = account,
-                UP_BUCKET = 'static.tundralabs.net'
+                UP_BUCKET = 'public-file-browser-files-0affe034d8f7'
             ),
             memory_size = 1024,
             role = role
@@ -462,7 +194,7 @@ class CloudcruftStack(Stack):
             timeout = Duration.seconds(900),
             environment = dict(
                 AWS_ACCOUNT = account,
-                UP_BUCKET = 'static.tundralabs.net'
+                UP_BUCKET = 'public-file-browser-files-0affe034d8f7'
             ),
             memory_size = 1024,
             role = role
@@ -535,9 +267,10 @@ class CloudcruftStack(Stack):
         findip = _lambda.DockerImageFunction(
             self, 'findip',
             code = _lambda.DockerImageCode.from_image_asset('search/ip'),
-            timeout = Duration.seconds(7),
+            timeout = Duration.seconds(13),
             environment = dict(
-                AWS_ACCOUNT = account
+                AWS_ACCOUNT = account,
+                UP_BUCKET = 'public-file-browser-files-0affe034d8f7'
             ),
             memory_size = 512,
             role = searchrole
@@ -573,9 +306,10 @@ class CloudcruftStack(Stack):
         finddns = _lambda.DockerImageFunction(
             self, 'finddns',
             code = _lambda.DockerImageCode.from_image_asset('search/dns'),
-            timeout = Duration.seconds(7),
+            timeout = Duration.seconds(13),
             environment = dict(
-                AWS_ACCOUNT = account
+                AWS_ACCOUNT = account,
+                UP_BUCKET = 'public-file-browser-files-0affe034d8f7'
             ),
             memory_size = 768,
             role = searchrole

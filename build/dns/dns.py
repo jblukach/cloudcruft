@@ -57,7 +57,7 @@ def handler(event, context):
     f.write(hasher('/tmp/dns.parquet'))
     f.close()
 
-    f = open('/tmp/dns.updated','w')
+    f = open('/tmp/last.updated','w')
     f.write(str(datetime.datetime.now()))
     f.close()
 
@@ -70,7 +70,7 @@ def handler(event, context):
     s3.meta.client.upload_file(
         '/tmp/dns.parquet',
         os.environ['UP_BUCKET'],
-        'dns.parquet',
+        'osint-identification/dns.parquet',
         ExtraArgs = {
             'ContentType': "application/vnd.apache.parquet"
         }
@@ -79,16 +79,16 @@ def handler(event, context):
     s3.meta.client.upload_file(
         '/tmp/dns.sha256',
         os.environ['UP_BUCKET'],
-        'dns.sha256',
+        'osint-identification/dns.sha256',
         ExtraArgs = {
             'ContentType': "text/plain"
         }
     )
 
     s3.meta.client.upload_file(
-        '/tmp/dns.updated',
+        '/tmp/last.updated',
         os.environ['UP_BUCKET'],
-        'dns.updated',
+        'osint-identification/last.updated',
         ExtraArgs = {
             'ContentType': "text/plain"
         }
@@ -97,7 +97,7 @@ def handler(event, context):
     s3.meta.client.upload_file(
         '/tmp/dns.count',
         os.environ['UP_BUCKET'],
-        'dns.count',
+        'osint-identification/dns.count',
         ExtraArgs = {
             'ContentType': "text/plain"
         }
