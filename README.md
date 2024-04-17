@@ -44,7 +44,7 @@ At 11:00 AM UTC daily, the Parquet files update with the latest Open Source Thre
 ### DNS Command
 
 ```
-https://dns.tundralabs.net/wexe.ink
+https://find.dns.tundralabs.net/wexe.ink
 ```
 
 ### DNS Output
@@ -72,7 +72,7 @@ https://dns.tundralabs.net/wexe.ink
 ### IP Command
 
 ```
-https://ip.tundralabs.net/49.143.32.6
+https://find.ip.tundralabs.net/49.143.32.6
 ```
 
 ### IP Output
