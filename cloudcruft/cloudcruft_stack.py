@@ -175,7 +175,7 @@ class CloudcruftStack(Stack):
             self, 'ipevent',
             schedule = _events.Schedule.cron(
                 minute = '0',
-                hour = '11',
+                hour = '*',
                 month = '*',
                 week_day = '*',
                 year = '*'
@@ -225,7 +225,7 @@ class CloudcruftStack(Stack):
             self, 'dnsevent',
             schedule = _events.Schedule.cron(
                 minute = '0',
-                hour = '11',
+                hour = '*',
                 month = '*',
                 week_day = '*',
                 year = '*'
