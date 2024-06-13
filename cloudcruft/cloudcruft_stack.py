@@ -13,7 +13,6 @@ from aws_cdk import (
     aws_lambda as _lambda,
     aws_logs as _logs,
     aws_s3 as _s3,
-    aws_ssm as _ssm,
     aws_sns as _sns
 )
 
@@ -284,32 +283,6 @@ class CloudcruftStack(Stack):
             _targets.LambdaFunction(sqlite)
         )
 
-    ### PARAMETERS ###
-
-        dnsparameter = _ssm.StringParameter(
-            self, 'dnsparameter',
-            description = 'CloudCruft DNS Status',
-            parameter_name = '/cloudcruft/dns/status',
-            string_value = 'EMPTY',
-            tier = _ssm.ParameterTier.STANDARD,
-        )
-
-        ipv4parameter = _ssm.StringParameter(
-            self, 'ipv4parameter',
-            description = 'CloudCruft IPv4 Status',
-            parameter_name = '/cloudcruft/ipv4/status',
-            string_value = 'EMPTY',
-            tier = _ssm.ParameterTier.STANDARD,
-        )
-
-        ipv6parameter = _ssm.StringParameter(
-            self, 'ipv6parameter',
-            description = 'CloudCruft IPv6 Status',
-            parameter_name = '/cloudcruft/ipv6/status',
-            string_value = 'EMPTY',
-            tier = _ssm.ParameterTier.STANDARD,
-        )
-
     ### PARQUET ###
 
         parquet = _lambda.DockerImageFunction(
@@ -320,10 +293,7 @@ class CloudcruftStack(Stack):
                 AWS_ACCOUNT = account,
                 DL_BUCKET = 'caretakerbucket',
                 UL_BUCKET = bucket.bucket_name,
-                SSM_PARAMETER_GIT = '/github/releases',
-                STATUS_PARAMETER_DNS = dnsparameter.parameter_name,
-                STATUS_PARAMETER_IPV4 = ipv4parameter.parameter_name,
-                STATUS_PARAMETER_IPV6 = ipv6parameter.parameter_name
+                SSM_PARAMETER_GIT = '/github/releases'
             ),
             memory_size = 1024,
             role = role

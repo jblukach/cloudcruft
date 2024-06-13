@@ -58,72 +58,7 @@ def handler(event, context):
             df = pd.concat([df, temp], ignore_index=True)
 
     df.to_parquet('/tmp/ipv4.parquet', compression='gzip')
-
-    status = ssm.get_parameter(
-        Name = os.environ['STATUS_PARAMETER_IPV4'],
-        WithDecryption = False
-    )
-
-    sha256 = hasher('/tmp/ipv4.parquet')
-
-    if status['Parameter']['Value'] != sha256:
-
-        headers = {
-            'Accept': 'application/vnd.github+json',
-            'Authorization': 'Bearer '+token['Parameter']['Value'],
-            'X-GitHub-Api-Version': '2022-11-28'
-        }
-
-        year = datetime.datetime.now().strftime('%Y')
-        month = datetime.datetime.now().strftime('%m')
-        epoch = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
-
-        data = '''{
-            "tag_name":"v'''+str(year)+'''.'''+str(month)+'''.'''+str(epoch)+'''",
-            "target_commitish":"main",
-            "name":"cloudcruft-ipv4",
-            "body":"The sha256 verification hash for the ipv4.parquet file is: '''+sha256+'''",
-            "draft":false,
-            "prerelease":false,
-            "generate_release_notes":false
-        }'''
-
-        response = requests.post(
-            'https://api.github.com/repos/jblukach/cloudcruft/releases',
-            headers=headers,
-            data=data
-        )
-
-        print(response.json())
-
-        headers = {
-            'Accept': 'application/vnd.github+json',
-            'Authorization': 'Bearer '+token['Parameter']['Value'],
-            'X-GitHub-Api-Version': '2022-11-28',
-            'Content-Type': 'application/octet-stream'
-        }
-
-        params = {
-            "name":"ipv4.parquet"
-        }
-
-        url = 'https://uploads.github.com/repos/jblukach/cloudcruft/releases/'+str(response.json()['id'])+'/assets'
-
-        with open('/tmp/ipv4.parquet', 'rb') as f:
-            data = f.read()
-        f.close()
-
-        response = requests.post(url, params=params, headers=headers, data=data)
-
-        print(response.json())
-
-        ssm.put_parameter(
-            Name = os.environ['STATUS_PARAMETER_IPV4'],
-            Description = 'CloudCruft IPv4 Status',
-            Value = sha256,
-            Type = 'String',
-            Overwrite = True
-        )
+    sha256ipv4 = hasher('/tmp/ipv4.parquet')
 
     ### IPv6 ###
 
@@ -151,72 +86,7 @@ def handler(event, context):
             df = pd.concat([df, temp], ignore_index=True)
 
     df.to_parquet('/tmp/ipv6.parquet', compression='gzip')
-
-    status = ssm.get_parameter(
-        Name = os.environ['STATUS_PARAMETER_IPV6'],
-        WithDecryption = False
-    )
-
-    sha256 = hasher('/tmp/ipv6.parquet')
-
-    if status['Parameter']['Value'] != sha256:
-
-        headers = {
-            'Accept': 'application/vnd.github+json',
-            'Authorization': 'Bearer '+token['Parameter']['Value'],
-            'X-GitHub-Api-Version': '2022-11-28'
-        }
-
-        year = datetime.datetime.now().strftime('%Y')
-        month = datetime.datetime.now().strftime('%m')
-        epoch = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
-
-        data = '''{
-            "tag_name":"v'''+str(year)+'''.'''+str(month)+'''.'''+str(epoch)+'''",
-            "target_commitish":"main",
-            "name":"cloudcruft-ipv6",
-            "body":"The sha256 verification hash for the ipv6.parquet file is: '''+sha256+'''",
-            "draft":false,
-            "prerelease":false,
-            "generate_release_notes":false
-        }'''
-
-        response = requests.post(
-            'https://api.github.com/repos/jblukach/cloudcruft/releases',
-            headers=headers,
-            data=data
-        )
-
-        print(response.json())
-
-        headers = {
-            'Accept': 'application/vnd.github+json',
-            'Authorization': 'Bearer '+token['Parameter']['Value'],
-            'X-GitHub-Api-Version': '2022-11-28',
-            'Content-Type': 'application/octet-stream'
-        }
-
-        params = {
-            "name":"ipv6.parquet"
-        }
-
-        url = 'https://uploads.github.com/repos/jblukach/cloudcruft/releases/'+str(response.json()['id'])+'/assets'
-
-        with open('/tmp/ipv6.parquet', 'rb') as f:
-            data = f.read()
-        f.close()
-
-        response = requests.post(url, params=params, headers=headers, data=data)
-
-        print(response.json())
-
-        ssm.put_parameter(
-            Name = os.environ['STATUS_PARAMETER_IPV6'],
-            Description = 'CloudCruft IPv6 Status',
-            Value = sha256,
-            Type = 'String',
-            Overwrite = True
-        )
+    sha256ipv6 = hasher('/tmp/ipv6.parquet')
 
     ### DNS ###
 
@@ -244,72 +114,108 @@ def handler(event, context):
             df = pd.concat([df, temp], ignore_index=True)
 
     df.to_parquet('/tmp/dns.parquet', compression='gzip')
+    sha256dns = hasher('/tmp/dns.parquet')
 
-    status = ssm.get_parameter(
-        Name = os.environ['STATUS_PARAMETER_DNS'],
-        WithDecryption = False
+    ### RELEASE TAG ###
+
+    headers = {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': 'Bearer '+token['Parameter']['Value'],
+        'X-GitHub-Api-Version': '2022-11-28'
+    }
+
+    year = datetime.datetime.now().strftime('%Y')
+    month = datetime.datetime.now().strftime('%m')
+    day = datetime.datetime.now().strftime('%d')
+    epoch = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+
+    data = '''{
+        "tag_name":"v'''+str(year)+'''.'''+str(month)+str(day)+'''.'''+str(epoch)+'''",
+        "target_commitish":"main",
+        "name":"cloudcruft",
+        "body":"The sha256 verifications: dns.parquet '''+sha256dns+''', ipv4.parquet '''+sha256ipv4+''', and ipv6.parquet '''+sha256ipv6+'''",
+        "draft":false,
+        "prerelease":false,
+        "generate_release_notes":false
+    }'''
+
+    response = requests.post(
+        'https://api.github.com/repos/jblukach/cloudcruft/releases',
+        headers=headers,
+        data=data
     )
 
-    sha256 = hasher('/tmp/dns.parquet')
+    tagged = response.json()['id']
+    print(response.json())
 
-    if status['Parameter']['Value'] != sha256:
+    ### DNS UPLOAD ###
 
-        headers = {
-            'Accept': 'application/vnd.github+json',
-            'Authorization': 'Bearer '+token['Parameter']['Value'],
-            'X-GitHub-Api-Version': '2022-11-28'
-        }
+    headers = {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': 'Bearer '+token['Parameter']['Value'],
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/octet-stream'
+    }
 
-        year = datetime.datetime.now().strftime('%Y')
-        month = datetime.datetime.now().strftime('%m')
-        epoch = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+    params = {
+        "name":"dns.parquet"
+    }
 
-        data = '''{
-            "tag_name":"v'''+str(year)+'''.'''+str(month)+'''.'''+str(epoch)+'''",
-            "target_commitish":"main",
-            "name":"cloudcruft-dns",
-            "body":"The sha256 verification hash for the dns.parquet file is: '''+sha256+'''",
-            "draft":false,
-            "prerelease":false,
-            "generate_release_notes":false
-        }'''
+    url = 'https://uploads.github.com/repos/jblukach/cloudcruft/releases/'+str(tagged)+'/assets'
 
-        response = requests.post(
-            'https://api.github.com/repos/jblukach/cloudcruft/releases',
-            headers=headers,
-            data=data
-        )
+    with open('/tmp/dns.parquet', 'rb') as f:
+        data = f.read()
+    f.close()
 
-        print(response.json())
+    response = requests.post(url, params=params, headers=headers, data=data)
 
-        headers = {
-            'Accept': 'application/vnd.github+json',
-            'Authorization': 'Bearer '+token['Parameter']['Value'],
-            'X-GitHub-Api-Version': '2022-11-28',
-            'Content-Type': 'application/octet-stream'
-        }
+    print(response.json())
 
-        params = {
-            "name":"dns.parquet"
-        }
+    ### IPv4 UPLOAD ###
 
-        url = 'https://uploads.github.com/repos/jblukach/cloudcruft/releases/'+str(response.json()['id'])+'/assets'
+    headers = {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': 'Bearer '+token['Parameter']['Value'],
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/octet-stream'
+    }
 
-        with open('/tmp/dns.parquet', 'rb') as f:
-            data = f.read()
-        f.close()
+    params = {
+        "name":"ipv4.parquet"
+    }
 
-        response = requests.post(url, params=params, headers=headers, data=data)
+    url = 'https://uploads.github.com/repos/jblukach/cloudcruft/releases/'+str(tagged)+'/assets'
 
-        print(response.json())
+    with open('/tmp/ipv4.parquet', 'rb') as f:
+        data = f.read()
+    f.close()
 
-        ssm.put_parameter(
-            Name = os.environ['STATUS_PARAMETER_DNS'],
-            Description = 'CloudCruft DNS Status',
-            Value = sha256,
-            Type = 'String',
-            Overwrite = True
-        )
+    response = requests.post(url, params=params, headers=headers, data=data)
+
+    print(response.json())
+
+    ### IPv6 UPLOAD ###
+
+    headers = {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': 'Bearer '+token['Parameter']['Value'],
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/octet-stream'
+    }
+
+    params = {
+        "name":"ipv6.parquet"
+    }
+
+    url = 'https://uploads.github.com/repos/jblukach/cloudcruft/releases/'+str(tagged)+'/assets'
+
+    with open('/tmp/ipv6.parquet', 'rb') as f:
+        data = f.read()
+    f.close()
+
+    response = requests.post(url, params=params, headers=headers, data=data)
+
+    print(response.json())
 
     ### S3 UPLOAD ###
 
