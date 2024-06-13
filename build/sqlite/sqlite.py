@@ -56,7 +56,7 @@ def handler(event, context):
     s3.meta.client.upload_file(
         '/tmp/dns.sqlite3',
         os.environ['UL_BUCKET'],
-        'uniq/dns.sqlite3',
+        'dns.sqlite3',
         ExtraArgs = {
             'ContentType': "application/x-sqlite3"
         }
@@ -113,7 +113,7 @@ def handler(event, context):
     s3.meta.client.upload_file(
         '/tmp/ipv4.sqlite3',
         os.environ['UL_BUCKET'],
-        'uniq/ipv4.sqlite3',
+        'ipv4.sqlite3',
         ExtraArgs = {
             'ContentType': "application/x-sqlite3"
         }
@@ -170,7 +170,7 @@ def handler(event, context):
     s3.meta.client.upload_file(
         '/tmp/ipv6.sqlite3',
         os.environ['UL_BUCKET'],
-        'uniq/ipv6.sqlite3',
+        'ipv6.sqlite3',
         ExtraArgs = {
             'ContentType': "application/x-sqlite3"
         }

@@ -46,7 +46,7 @@ def handler(event, context):
     s3.meta.client.upload_file(
         '/tmp/dns.txt',
         os.environ['UL_BUCKET'],
-        'uniq/dns.txt',
+        'dns.txt',
         ExtraArgs = {
             'ContentType': "text/plain"
         }
@@ -94,7 +94,7 @@ def handler(event, context):
     s3.meta.client.upload_file(
         '/tmp/ipv4.txt',
         os.environ['UL_BUCKET'],
-        'uniq/ipv4.txt',
+        'ipv4.txt',
         ExtraArgs = {
             'ContentType': "text/plain"
         }
@@ -142,7 +142,7 @@ def handler(event, context):
     s3.meta.client.upload_file(
         '/tmp/ipv6.txt',
         os.environ['UL_BUCKET'],
-        'uniq/ipv6.txt',
+        'ipv6.txt',
         ExtraArgs = {
             'ContentType': "text/plain"
         }

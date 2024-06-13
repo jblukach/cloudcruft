@@ -13,6 +13,7 @@ from aws_cdk import (
     aws_lambda as _lambda,
     aws_logs as _logs,
     aws_s3 as _s3,
+    aws_ssm as _ssm,
     aws_sns as _sns
 )
 
@@ -157,7 +158,9 @@ class CloudcruftStack(Stack):
                 actions = [
                     's3:GetObject',
                     's3:ListBucket',
-                    's3:PutObject'
+                    's3:PutObject',
+                    'ssm:GetParameter',
+                    'ssm:PutParameter'
                 ],
                 resources = [
                     '*'
@@ -170,7 +173,7 @@ class CloudcruftStack(Stack):
         unique = _lambda.Function(
             self, 'unique',
             runtime = _lambda.Runtime.PYTHON_3_12,
-            code = _lambda.Code.from_asset('unique'),
+            code = _lambda.Code.from_asset('build/unique'),
             architecture = _lambda.Architecture.ARM_64,
             handler = 'unique.handler',
             timeout = Duration.seconds(900),
@@ -228,7 +231,7 @@ class CloudcruftStack(Stack):
         sqlite = _lambda.Function(
             self, 'sqlite',
             runtime = _lambda.Runtime.PYTHON_3_12,
-            code = _lambda.Code.from_asset('sqlite'),
+            code = _lambda.Code.from_asset('build/sqlite'),
             architecture = _lambda.Architecture.ARM_64,
             handler = 'sqlite.handler',
             timeout = Duration.seconds(900),
@@ -277,6 +280,87 @@ class CloudcruftStack(Stack):
             )
         )
 
-        #sqliteevent.add_target(
-        #    _targets.LambdaFunction(sqlite)
-        #)
+        sqliteevent.add_target(
+            _targets.LambdaFunction(sqlite)
+        )
+
+    ### PARAMETERS ###
+
+        dnsparameter = _ssm.StringParameter(
+            self, 'dnsparameter',
+            description = 'CloudCruft DNS Status',
+            parameter_name = '/cloudcruft/dns/status',
+            string_value = 'EMPTY',
+            tier = _ssm.ParameterTier.STANDARD,
+        )
+
+        ipv4parameter = _ssm.StringParameter(
+            self, 'ipv4parameter',
+            description = 'CloudCruft IPv4 Status',
+            parameter_name = '/cloudcruft/ipv4/status',
+            string_value = 'EMPTY',
+            tier = _ssm.ParameterTier.STANDARD,
+        )
+
+        ipv6parameter = _ssm.StringParameter(
+            self, 'ipv6parameter',
+            description = 'CloudCruft IPv6 Status',
+            parameter_name = '/cloudcruft/ipv6/status',
+            string_value = 'EMPTY',
+            tier = _ssm.ParameterTier.STANDARD,
+        )
+
+    ### PARQUET ###
+
+        parquet = _lambda.DockerImageFunction(
+            self, 'parquet',
+            code = _lambda.DockerImageCode.from_image_asset('build/parquet'),
+            timeout = Duration.seconds(900),
+            environment = dict(
+                AWS_ACCOUNT = account,
+                DL_BUCKET = 'caretakerbucket',
+                UL_BUCKET = bucket.bucket_name,
+                SSM_PARAMETER_GIT = '/github/releases',
+                STATUS_PARAMETER_DNS = dnsparameter.parameter_name,
+                STATUS_PARAMETER_IPV4 = ipv4parameter.parameter_name,
+                STATUS_PARAMETER_IPV6 = ipv6parameter.parameter_name
+            ),
+            memory_size = 1024,
+            role = role
+        )
+
+        parquetlogs = _logs.LogGroup(
+            self, 'parquetlogs',
+            log_group_name = '/aws/lambda/'+parquet.function_name,
+            retention = _logs.RetentionDays.ONE_DAY,
+            removal_policy = RemovalPolicy.DESTROY
+        )
+
+        parquetalarm = _cloudwatch.Alarm(
+            self, 'parquetalarm',
+            comparison_operator = _cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+            threshold = 0,
+            evaluation_periods = 1,
+            metric = parquet.metric_errors(
+                period = Duration.minutes(1)
+            )
+        )
+
+        parquetalarm.add_alarm_action(
+            _actions.SnsAction(topic)
+        )
+
+        parquetevent = _events.Rule(
+            self, 'parquetevent',
+            schedule = _events.Schedule.cron(
+                minute = '0',
+                hour = '*',
+                month = '*',
+                week_day = '*',
+                year = '*'
+            )
+        )
+
+        parquetevent.add_target(
+            _targets.LambdaFunction(parquet)
+        )
