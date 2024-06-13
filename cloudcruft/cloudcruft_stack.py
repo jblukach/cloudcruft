@@ -222,3 +222,61 @@ class CloudcruftStack(Stack):
         uniqueevent.add_target(
             _targets.LambdaFunction(unique)
         )
+
+   ### SQLITE LAMBDA ###
+
+        sqlite = _lambda.Function(
+            self, 'sqlite',
+            runtime = _lambda.Runtime.PYTHON_3_12,
+            code = _lambda.Code.from_asset('sqlite'),
+            architecture = _lambda.Architecture.ARM_64,
+            handler = 'sqlite.handler',
+            timeout = Duration.seconds(900),
+            environment = dict(
+                AWS_ACCOUNT = account,
+                DL_BUCKET = 'caretakerbucket',
+                UL_BUCKET = bucket.bucket_name
+            ),
+            memory_size = 512,
+            retry_attempts = 0,
+            role = role,
+            layers = [
+                getpublicip
+            ]
+        )
+
+        sqlitelogs = _logs.LogGroup(
+            self, 'sqlitelogs',
+            log_group_name = '/aws/lambda/'+sqlite.function_name,
+            retention = _logs.RetentionDays.ONE_DAY,
+            removal_policy = RemovalPolicy.DESTROY
+        )
+
+        sqlitealarm = _cloudwatch.Alarm(
+            self, 'sqlitealarm',
+            comparison_operator = _cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+            threshold = 0,
+            evaluation_periods = 1,
+            metric = sqlite.metric_errors(
+                period = Duration.minutes(1)
+            )
+        )
+
+        sqlitealarm.add_alarm_action(
+            _actions.SnsAction(topic)
+        )
+
+        sqliteevent = _events.Rule(
+            self, 'sqliteevent',
+            schedule = _events.Schedule.cron(
+                minute = '0',
+                hour = '*',
+                month = '*',
+                week_day = '*',
+                year = '*'
+            )
+        )
+
+        #sqliteevent.add_target(
+        #    _targets.LambdaFunction(sqlite)
+        #)
