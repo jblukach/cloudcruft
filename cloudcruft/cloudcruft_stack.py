@@ -13,6 +13,7 @@ from aws_cdk import (
     aws_lambda as _lambda,
     aws_logs as _logs,
     aws_s3 as _s3,
+    aws_s3_deployment as _deployment,
     aws_sns as _sns
 )
 
