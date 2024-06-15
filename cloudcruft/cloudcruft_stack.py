@@ -138,6 +138,13 @@ class CloudcruftStack(Stack):
             versioned = False
         )
 
+        deployment = _deployment.BucketDeployment(
+            self, 'DeployFunctionFile',
+            sources = [_deployment.Source.asset('code')],
+            destination_bucket = bucket,
+            prune = False
+        )
+
     ### IAM ROLE ###
 
         role = _iam.Role(
@@ -156,6 +163,7 @@ class CloudcruftStack(Stack):
         role.add_to_policy(
             _iam.PolicyStatement(
                 actions = [
+                    'lambda:UpdateFunctionCode',
                     's3:GetObject',
                     's3:ListBucket',
                     's3:PutObject',

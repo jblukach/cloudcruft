@@ -1,6 +1,7 @@
 import boto3
 import json
 import os
+import zipfile
 
 def handler(event, context):
 
@@ -146,6 +147,54 @@ def handler(event, context):
         ExtraArgs = {
             'ContentType': "text/plain"
         }
+    )
+
+    ### DELPLOYMENT ###
+
+    s3 = boto3.client('s3')
+
+    s3.download_file(
+        os.environ['UL_BUCKET'],
+        'spf.py',
+        '/tmp/spf.py'
+    )
+
+    with zipfile.ZipFile('/tmp/spf.zip', 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zipf:
+
+        zipf.write(
+            '/tmp/spf.py',
+            'spf.py'
+        )
+
+        zipf.write(
+            '/tmp/dns.txt',
+            'dns.txt'
+        )
+
+        zipf.write(
+            '/tmp/ipv4.txt',
+            'ipv4.txt'
+        )
+
+        zipf.write(
+            '/tmp/ipv6.txt',
+            'ipv6.txt'
+        )
+
+    zipf.close()
+
+    s3.upload_file(
+        '/tmp/spf.zip',
+        os.environ['UL_BUCKET'],
+        'spf.zip'
+    )
+
+    client = boto3.client('lambda')
+
+    response = client.update_function_code(
+        FunctionName = 'spf',
+        S3Bucket = os.environ['UL_BUCKET'],
+        S3Key = 'spf.zip'
     )
 
     return {
