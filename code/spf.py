@@ -55,7 +55,7 @@ def handler(event, context):
                             count = (lastip - firstip) + count
                             for ip in suspect:
                                 if ip >= firstip and ip <= lastip:
-                                    ipv6_matches.append(ipaddress.ip_address(ip))
+                                    ipv6_matches.append(str(ipaddress.ip_address(ip)))
 
             f = open('ipv4.txt', 'r')
             data = f.read()
