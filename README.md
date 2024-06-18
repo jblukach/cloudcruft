@@ -1,6 +1,8 @@
 # cloudcruft
 
-Public IP addresses from a shared pool are automatically assigned using the Dynamic Host Configuration Protocol (DHCP) as resources launch. Addresses occasionally develop a poor reputation on the Internet before being returned. The next organization blindly assumes those addresses, which can result in a negative customer experience. 
+Public IP addresses from a shared pool are automatically assigned using the Dynamic Host Configuration Protocol (DHCP) as resources launch. Addresses occasionally develop a poor reputation on the Internet before being returned. The following organization blindly assumes those addresses, which can result in a negative customer experience.
+
+Cloudcruft captures DNS, IPv4, and IPv6 atomic indicators from Open-Source Intelligence Threat Feeds, storing them in Apache Parquet files for investigations into the past.
 
 ### Threat Feeds
 
