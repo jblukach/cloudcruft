@@ -65,7 +65,7 @@ The **rdap** endpoint uses the Registration Data Access Protocol (RDAP) Query Fo
 
 https://rdap.tundralabs.net/4n6ir.com
 
-The **spf** endpoint allows the investigation of DNS, IPv4, and IPv6 against the collected threat feeds that could be involved in malware and phishing attacks.
+The **spf** endpoint allows the investigation of DNS, IPv4, and IPv6 against the collected threat feeds that could be sending malware and phishing emails.
 
 https://spf.tundralabs.net/4n6ir.com
 

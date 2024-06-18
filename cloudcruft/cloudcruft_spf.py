@@ -79,7 +79,7 @@ class CloudcruftSpf(Stack):
             environment = dict(
                 AWS_ACCOUNT = account
             ),
-            memory_size = 512,
+            memory_size = 1024,
             retry_attempts = 0,
             role = role,
             layers = [
