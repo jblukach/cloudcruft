@@ -199,12 +199,6 @@ def handler(event, context):
         '/tmp/ipv6.py'
     )
 
-    s3.download_file(
-        os.environ['UL_BUCKET'],
-        'url.py',
-        '/tmp/url.py'
-    )
-
     ### COMPRESSION ###
 
     with zipfile.ZipFile('/tmp/dns.zip', 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zipf:
@@ -249,20 +243,6 @@ def handler(event, context):
 
     zipf.close()
 
-    with zipfile.ZipFile('/tmp/url.zip', 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zipf:
-
-        zipf.write(
-            '/tmp/url.py',
-            'url.py'
-        )
-
-        zipf.write(
-            '/tmp/dns.sqlite3',
-            'dns.sqlite3'
-        )
-
-    zipf.close()
-
     ### UPLOAD ZIP ###
 
     s3.upload_file(
@@ -281,12 +261,6 @@ def handler(event, context):
         '/tmp/ipv6.zip',
         os.environ['UL_BUCKET'],
         'ipv6.zip'
-    )
-
-    s3.upload_file(
-        '/tmp/url.zip',
-        os.environ['UL_BUCKET'],
-        'url.zip'
     )
 
     ### UPDATE FUNCTION ###
@@ -309,12 +283,6 @@ def handler(event, context):
         FunctionName = 'ipv6',
         S3Bucket = os.environ['UL_BUCKET'],
         S3Key = 'ipv6.zip'
-    )
-
-    response = client.update_function_code(
-        FunctionName = 'url',
-        S3Bucket = os.environ['UL_BUCKET'],
-        S3Key = 'url.zip'
     )
 
     return {
