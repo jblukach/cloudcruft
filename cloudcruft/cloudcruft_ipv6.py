@@ -64,7 +64,7 @@ class CloudcruftIpv6(Stack):
             runtime = _lambda.Runtime.PYTHON_3_12,
             architecture = _lambda.Architecture.ARM_64,
             code = _lambda.Code.from_asset('api/ipv6'),
-            timeout = Duration.seconds(3),
+            timeout = Duration.seconds(7),
             handler = 'ipv6.handler',
             environment = dict(
                 AWS_ACCOUNT = account

@@ -11,7 +11,6 @@ from cloudcruft.cloudcruft_mx import CloudcruftMx
 from cloudcruft.cloudcruft_rdap import CloudcruftRdap
 from cloudcruft.cloudcruft_spf import CloudcruftSpf
 from cloudcruft.cloudcruft_stack import CloudcruftStack
-from cloudcruft.cloudcruft_url import CloudcruftUrl
 
 app = cdk.App()
 
@@ -94,17 +93,6 @@ CloudcruftSpf(
 
 CloudcruftStack(
     app, 'CloudcruftStack',
-    env = cdk.Environment(
-        account = os.getenv('CDK_DEFAULT_ACCOUNT'),
-        region = 'us-east-1'
-    ),
-    synthesizer = cdk.DefaultStackSynthesizer(
-        qualifier = '4n6ir'
-    )
-)
-
-CloudcruftUrl(
-    app, 'CloudcruftUrl',
     env = cdk.Environment(
         account = os.getenv('CDK_DEFAULT_ACCOUNT'),
         region = 'us-east-1'
