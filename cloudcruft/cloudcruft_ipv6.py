@@ -148,7 +148,9 @@ class CloudcruftIpv6(Stack):
             self, 'distribution',
             comment = 'ipv6.tundralabs.net',
             default_behavior = _cloudfront.BehaviorOptions(
-                origin = _origins.FunctionUrlOrigin(url)
+                origin = _origins.FunctionUrlOrigin(url),
+                viewer_protocol_policy = _cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                cache_policy = _cloudfront.CachePolicy.CACHING_DISABLED
             ),
             domain_names = [
                 'ipv6.tundralabs.net'
