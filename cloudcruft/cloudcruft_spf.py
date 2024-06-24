@@ -29,26 +29,31 @@ class CloudcruftSpf(Stack):
 
     ### LAYER ###
 
+        extensions = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'extensions',
+            parameter_name = '/extensions/account'
+        )
+
         dnspython = _lambda.LayerVersion.from_layer_version_arn(
             self, 'dnspython',
-            layer_version_arn = 'arn:aws:lambda:'+region+':070176467818:layer:dnspython:4'
+            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:dnspython:4'
         )
 
         getpublicip = _lambda.LayerVersion.from_layer_version_arn(
             self, 'getpublicip',
-            layer_version_arn = 'arn:aws:lambda:'+region+':070176467818:layer:getpublicip:12'
+            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:getpublicip:12'
         )
 
         netaddr = _lambda.LayerVersion.from_layer_version_arn(
             self, 'netaddr',
-            layer_version_arn = 'arn:aws:lambda:'+region+':070176467818:layer:netaddr:7'
+            layer_version_arn = 'arn:aws:lambda:'+region+':'+extensions.string_value+':layer:netaddr:7'
         )
 
     ### TOPIC ###
 
         topic = _sns.Topic.from_topic_arn(
             self, 'topic',
-            topic_arn = 'arn:aws:sns:'+region+':'+account+':monitor'
+            topic_arn = 'arn:aws:sns:'+region+':'+account+':cloudcruft'
         )
 
     ### IAM ###
