@@ -227,6 +227,13 @@ class CloudcruftStack(Stack):
             RemovalPolicy.DESTROY    
         )
 
+    ### PARAMETER ###
+
+        parameter = _ssm.StringParameter.from_string_parameter_attributes(
+            self, 'parameter',
+            parameter_name = '/org/id'
+        )
+
     ### S3 BUCKET ###
 
         bucket = _s3.Bucket(
@@ -246,6 +253,42 @@ class CloudcruftStack(Stack):
             destination_bucket = bucket,
             prune = False
         )
+
+        bucket_policy = _iam.PolicyStatement(
+            effect = _iam.Effect(
+                'ALLOW'
+            ),
+            principals = [
+                _iam.AnyPrincipal()
+            ],
+            actions = [
+                's3:ListBucket'
+            ],
+            resources = [
+                bucket.bucket_arn
+            ],
+            conditions = {"StringEquals": {"aws:PrincipalOrgID": parameter.string_value}}
+        )
+
+        bucket.add_to_resource_policy(bucket_policy)
+
+        object_policy = _iam.PolicyStatement(
+            effect = _iam.Effect(
+                'ALLOW'
+            ),
+            principals = [
+                _iam.AnyPrincipal()
+            ],
+            actions = [
+                's3:GetObject'
+            ],
+            resources = [
+                bucket.arn_for_objects('*')
+            ],
+            conditions = {"StringEquals": {"aws:PrincipalOrgID": parameter.string_value}}
+        )
+
+        bucket.add_to_resource_policy(object_policy)
 
     ### IAM ROLE ###
 
