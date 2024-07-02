@@ -61,10 +61,6 @@ The **mx** endpoint checks for DMARC, MX, SPF, TXT, and select DKIM records that
 
 https://mx.tundralabs.net/4n6ir.com
 
-The **rdap** endpoint uses the Registration Data Access Protocol (RDAP) Query Format to replace WHOIS lookups, referenced with RFC 7480.
-
-https://rdap.tundralabs.net/4n6ir.com
-
 The **spf** endpoint allows the investigation of DNS, IPv4, and IPv6 against the collected threat feeds that could be sending malware and phishing emails.
 
 https://spf.tundralabs.net/4n6ir.com

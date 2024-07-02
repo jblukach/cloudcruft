@@ -8,7 +8,6 @@ from cloudcruft.cloudcruft_egress import CloudcruftEgress
 from cloudcruft.cloudcruft_ipv4 import CloudcruftIpv4
 from cloudcruft.cloudcruft_ipv6 import CloudcruftIpv6
 from cloudcruft.cloudcruft_mx import CloudcruftMx
-from cloudcruft.cloudcruft_rdap import CloudcruftRdap
 from cloudcruft.cloudcruft_spf import CloudcruftSpf
 from cloudcruft.cloudcruft_stack import CloudcruftStack
 
@@ -60,17 +59,6 @@ CloudcruftIpv6(
 
 CloudcruftMx(
     app, 'CloudcruftMx',
-    env = cdk.Environment(
-        account = os.getenv('CDK_DEFAULT_ACCOUNT'),
-        region = 'us-east-1'
-    ),
-    synthesizer = cdk.DefaultStackSynthesizer(
-        qualifier = '4n6ir'
-    )
-)
-
-CloudcruftRdap(
-    app, 'CloudcruftRdap',
     env = cdk.Environment(
         account = os.getenv('CDK_DEFAULT_ACCOUNT'),
         region = 'us-east-1'
