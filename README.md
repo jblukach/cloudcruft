@@ -10,7 +10,6 @@ I appreciate all the work that goes into maintaining these threat feeds - thank 
 
 - https://cert.pl
 - https://cinsscore.com
-- https://ellio.tech
 - https://feodotracker.abuse.ch
 - https://github.com/drb-ra
 - https://github.com/elliotwutingfeng
@@ -26,7 +25,6 @@ I appreciate all the work that goes into maintaining these threat feeds - thank 
 - https://phishtank.com
 - https://report.cs.rutgers.edu
 - https://sslbl.abuse.ch
-- https://talosintelligence.com
 - https://urlabuse.com
 - https://zonefiles.io
 - https://www.binarydefense.com
