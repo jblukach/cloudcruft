@@ -18,6 +18,7 @@ I appreciate all the work that goes into maintaining these threat feeds - thank 
 - https://github.com/Ultimate-Hosts-Blacklist
 - https://greensnow.co
 - https://jamesbrine.com.au
+- https://oisd.nl
 - https://openphish.com
 - https://osint.digitalside.it
 - https://otx.alienvault.com
