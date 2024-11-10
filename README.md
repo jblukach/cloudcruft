@@ -9,9 +9,7 @@ Cloudcruft captures DNS, IPv4, and IPv6 atomic indicators from Open-Source Intel
 I appreciate all the work that goes into maintaining these threat feeds - thank you!
 
 - https://cert.pl
-- https://check-the-sum.fr
 - https://cinsscore.com
-- https://ellio.tech
 - https://feodotracker.abuse.ch
 - https://github.com/drb-ra
 - https://github.com/elliotwutingfeng
