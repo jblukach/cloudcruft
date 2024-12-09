@@ -10,7 +10,6 @@ from aws_cdk import (
     aws_logs as _logs,
     aws_route53 as _route53,
     aws_route53_targets as _r53targets,
-    aws_s3 as _s3,
     aws_ssm as _ssm
 )
 
@@ -102,23 +101,11 @@ class CloudcruftMx(Stack):
              zone_name = 'tundralabs.net'
         )   
 
-    ### CLOUDFRONT LOGS ###
-
-        cloudcruftmxcloudfrontlogs = _s3.Bucket(
-            self, 'cloudcruftmxcloudfrontlogs',
-            bucket_name = 'cloudcruftmxcloudfrontlogs',
-            encryption = _s3.BucketEncryption.S3_MANAGED,
-            object_ownership = _s3.ObjectOwnership.OBJECT_WRITER,
-            block_public_access = _s3.BlockPublicAccess.BLOCK_ALL,
-            removal_policy = RemovalPolicy.DESTROY,
-            auto_delete_objects = True,
-            enforce_ssl = True,
-            versioned = True
-        )
-
-        cloudcruftmxcloudfrontlogs.add_lifecycle_rule(
-            expiration = Duration.days(400),
-            noncurrent_version_expiration = Duration.days(1)
+        cdnlogs = _logs.LogGroup(
+            self, 'cdnlogs',
+            log_group_name = '/aws/cloudfront/mxtundralabsnet',
+            retention = _logs.RetentionDays.THIRTEEN_MONTHS,
+            removal_policy = RemovalPolicy.DESTROY
         )
 
     ### ACM CERTIFICATE ###
@@ -150,8 +137,6 @@ class CloudcruftMx(Stack):
                 )
             ],
             certificate = acm,
-            log_bucket = cloudcruftmxcloudfrontlogs,
-            log_includes_cookies = True,
             minimum_protocol_version = _cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
             price_class = _cloudfront.PriceClass.PRICE_CLASS_100,
             http_version = _cloudfront.HttpVersion.HTTP2_AND_3,
